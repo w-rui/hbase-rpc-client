@@ -16,52 +16,20 @@
  * limitations under the License.
  */
 
-// Cell and KeyValue protos
 package hbase.pb;
 
 option java_package = "org.apache.hadoop.hbase.protobuf.generated";
-option java_outer_classname = "CellProtos";
+option java_outer_classname = "RSGroupProtos";
+option java_generic_services = true;
 option java_generate_equals_and_hash = true;
 option optimize_for = SPEED;
 
-/**
- * The type of the key in a Cell
- */
-enum CellType {
-    MINIMUM = 0;
-    PUT = 4;
+import "Table.proto";
+import "HBase.proto";
 
-    DELETE = 8;
-    DELETE_COLUMN = 12;
-    DELETE_FAMILY = 14;
-
-    // MAXIMUM is used when searching; you look from maximum on down.
-    MAXIMUM = 255;
+message RSGroupInfo {
+  required string name = 1;
+  repeated ServerName servers = 4;
+  repeated TableName tables = 3;
 }
 
-/**
- * Protocol buffer version of Cell.
- */
-message Cell {
-  optional bytes row = 1;
-  optional bytes family = 2;
-  optional bytes qualifier = 3;
-  optional uint64 timestamp = 4;
-  optional CellType cell_type = 5;
-  optional bytes value = 6;
-  optional bytes tags = 7;
-}
-
-/**
- * Protocol buffer version of KeyValue.
- * It doesn't have those transient parameters
- */
-message KeyValue {
-  required bytes row = 1;
-  required bytes family = 2;
-  required bytes qualifier = 3;
-  optional uint64 timestamp = 4;
-  optional CellType key_type = 5;
-  optional bytes value = 6;
-  optional bytes tags = 7;
-}

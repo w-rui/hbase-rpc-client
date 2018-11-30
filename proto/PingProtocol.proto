@@ -15,31 +15,52 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/**
- * Defines a protocol to perform multi row transactions.
- * See BaseRowProcessorEndpoint for the implementation.
- * See HRegion#processRowsWithLocks() for details.
- */
-package hbase.pb;
-
-option java_package = "org.apache.hadoop.hbase.protobuf.generated";
-option java_outer_classname = "RowProcessorProtos";
+// Coprocessor test
+option java_package = "org.apache.hadoop.hbase.coprocessor.protobuf.generated";
+option java_outer_classname = "PingProtos";
 option java_generic_services = true;
 option java_generate_equals_and_hash = true;
-option optimize_for = SPEED;
 
-message ProcessRequest {
-  required string row_processor_class_name = 1;
-  optional string row_processor_initializer_message_name = 2;
-  optional bytes  row_processor_initializer_message = 3;
-  optional uint64 nonce_group = 4;
-  optional uint64 nonce = 5;
+message PingRequest {
 }
 
-message ProcessResponse {
-  required bytes row_processor_result = 1;
+message PingResponse {
+  required string pong = 1;
 }
 
-service RowProcessorService {
-  rpc Process(ProcessRequest) returns (ProcessResponse);
+message CountRequest {
+}
+
+message CountResponse {
+  required int32 count = 1;
+}
+
+message IncrementCountRequest {
+  required int32 diff = 1;
+}
+
+message IncrementCountResponse {
+  required int32 count = 1;
+}
+
+message HelloRequest {
+  optional string name = 1;
+}
+
+message HelloResponse {
+  optional string response = 1;
+}
+
+message NoopRequest {
+}
+
+message NoopResponse {
+}
+
+service PingService {
+  rpc ping(PingRequest) returns(PingResponse);
+  rpc count(CountRequest) returns(CountResponse);
+  rpc increment(IncrementCountRequest) returns(IncrementCountResponse);
+  rpc hello(HelloRequest) returns(HelloResponse);
+  rpc noop(NoopRequest) returns(NoopResponse);
 }

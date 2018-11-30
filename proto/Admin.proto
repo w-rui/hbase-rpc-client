@@ -17,6 +17,7 @@
  */
 
 // This file contains protocol buffers that are used for Admin service.
+package hbase.pb;
 
 option java_package = "org.apache.hadoop.hbase.protobuf.generated";
 option java_outer_classname = "AdminProtos";
@@ -24,7 +25,6 @@ option java_generic_services = true;
 option java_generate_equals_and_hash = true;
 option optimize_for = SPEED;
 
-import "Client.proto";
 import "HBase.proto";
 import "WAL.proto";
 
@@ -36,7 +36,7 @@ message GetRegionInfoRequest {
 message GetRegionInfoResponse {
   required RegionInfo region_info = 1;
   optional CompactionState compaction_state = 2;
-  optional bool isRecovering = 3;
+  // optional bool DEPRECATED_isRecovering = 3;
 
   enum CompactionState {
     NONE = 0;
@@ -68,11 +68,17 @@ message GetOnlineRegionResponse {
 
 message OpenRegionRequest {
   repeated RegionOpenInfo open_info = 1;
+  // the intended server for this RPC.
+  optional uint64 serverStartCode = 2;
+  // wall clock time from master
+  optional uint64 master_system_time = 5;
 
   message RegionOpenInfo {
     required RegionInfo region = 1;
     optional uint32 version_of_offline_node = 2;
     repeated ServerName favored_nodes = 3;
+    // open region for distributedLogReplay
+    // optional bool DEPRECATED_openForDistributedLogReplay = 4;
   }
 }
 
@@ -86,6 +92,14 @@ message OpenRegionResponse {
   }
 }
 
+message WarmupRegionRequest {
+
+    required RegionInfo regionInfo = 1;
+}
+
+message WarmupRegionResponse {
+}
+
 /**
  * Closes the specified region and will use or not use ZK during the close
  * according to the specified flag.
@@ -95,6 +109,8 @@ message CloseRegionRequest {
   optional uint32 version_of_closing_node = 2;
   optional bool transition_in_ZK = 3 [default = true];
   optional ServerName destination_server = 4;
+  // the intended server for this RPC.
+  optional uint64 serverStartCode = 5;
 }
 
 message CloseRegionResponse {
@@ -109,11 +125,13 @@ message CloseRegionResponse {
 message FlushRegionRequest {
   required RegionSpecifier region = 1;
   optional uint64 if_older_than_ts = 2;
+  optional bool write_flush_wal_marker = 3; // whether to write a marker to WAL even if not flushed
 }
 
 message FlushRegionResponse {
   required uint64 last_flush_time = 1;
   optional bool flushed = 2;
+  optional bool wrote_flush_wal_marker = 3;
 }
 
 /**
@@ -167,6 +185,8 @@ message MergeRegionsRequest {
   required RegionSpecifier region_a = 1;
   required RegionSpecifier region_b = 2;
   optional bool forcible = 3 [default = false];
+  // wall clock time from master
+  optional uint64 master_system_time = 4;
 }
 
 message MergeRegionsResponse {
@@ -186,10 +206,13 @@ message WALEntry {
 /**
  * Replicates the given entries. The guarantee is that the given entries
  * will be durable on the slave cluster if this method returns without
- * any exception.  hbase.replication has to be set to true for this to work.
+ * any exception.
  */
 message ReplicateWALEntryRequest {
   repeated WALEntry entry = 1;
+  optional string replicationClusterId = 2;
+  optional string sourceBaseNamespaceDirPath = 3;
+  optional string sourceHFileArchiveDirPath = 4;
 }
 
 message ReplicateWALEntryResponse {
@@ -198,6 +221,10 @@ message ReplicateWALEntryResponse {
 message RollWALWriterRequest {
 }
 
+/*
+ * Roll request responses no longer include regions to flush
+ * this list will always be empty when talking to a 1.0 server
+ */
 message RollWALWriterResponse {
   // A list of encoded name of regions to flush
   repeated bytes region_to_flush = 1;
@@ -222,6 +249,12 @@ message GetServerInfoResponse {
   required ServerInfo server_info = 1;
 }
 
+message UpdateConfigurationRequest {
+}
+
+message UpdateConfigurationResponse {
+}
+
 service AdminService {
   rpc GetRegionInfo(GetRegionInfoRequest)
     returns(GetRegionInfoResponse);
@@ -234,6 +267,9 @@ service AdminService {
 
   rpc OpenRegion(OpenRegionRequest)
     returns(OpenRegionResponse);
+
+  rpc WarmupRegion(WarmupRegionRequest)
+    returns(WarmupRegionResponse);
 
   rpc CloseRegion(CloseRegionRequest)
     returns(CloseRegionResponse);
@@ -267,4 +303,7 @@ service AdminService {
 
   rpc UpdateFavoredNodes(UpdateFavoredNodesRequest)
     returns(UpdateFavoredNodesResponse);
+
+  rpc UpdateConfiguration(UpdateConfigurationRequest)
+    returns(UpdateConfigurationResponse);
 }

@@ -15,19 +15,29 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package hbase.pb;
 
-option java_package = "org.apache.hadoop.hbase.protobuf.generated";
-option java_outer_classname = "TracingProtos";
+option java_package = "org.apache.hadoop.hbase.ipc.protobuf.generated";
+option java_outer_classname = "TestProtos";
 option java_generate_equals_and_hash = true;
-option optimize_for = SPEED;
 
-//Used to pass through the information necessary to continue
-//a trace after an RPC is made. All we need is the traceid 
-//(so we know the overarching trace this message is a part of), and
-//the id of the current span when this message was sent, so we know 
-//what span caused the new span we will create when this message is received.
-message RPCTInfo {
-  optional int64 trace_id = 1;
-  optional int64 parent_id = 2;
+message EmptyRequestProto {
+}
+
+message EmptyResponseProto {
+}
+
+message EchoRequestProto {
+  required string message = 1;
+}
+
+message EchoResponseProto {
+  required string message = 1;
+}
+
+message PauseRequestProto {
+  required uint32 ms = 1;
+}
+
+message AddrResponseProto {
+  required string addr = 1;
 }

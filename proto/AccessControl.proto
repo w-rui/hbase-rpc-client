@@ -15,6 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package hbase.pb;
 
 option java_package = "org.apache.hadoop.hbase.protobuf.generated";
 option java_outer_classname = "AccessControlProtos";
@@ -22,7 +23,7 @@ option java_generic_services = true;
 option java_generate_equals_and_hash = true;
 option optimize_for = SPEED;
 
-import "HBase.proto";
+import "Table.proto";
 
 message Permission {
     enum Action {
@@ -78,6 +79,7 @@ message UsersAndPermissions {
 
 message GrantRequest {
   required UserPermission user_permission = 1;
+  optional bool merge_existing_permissions = 2 [default = false];
 }
 
 message GrantResponse {

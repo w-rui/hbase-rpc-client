@@ -17,6 +17,7 @@
  */
 
  //This file includes protocol buffers used in MapReduce only.
+package hbase.pb;
 
 option java_package = "org.apache.hadoop.hbase.protobuf.generated";
 option java_outer_classname = "MapReduceProtos";
@@ -30,6 +31,7 @@ message ScanMetrics {
 }
 
 message TableSnapshotRegionSplit {
-  optional RegionSpecifier region = 1;
   repeated string locations = 2;
+  optional TableSchema table = 3;
+  optional RegionInfo region = 4;
 }
