@@ -203,16 +203,16 @@ module.exports = class Client extends EventEmitter
 	_parseRegionInfo: (res) ->
 		return null unless res and Object.keys(res).length
 
-		regionInfo = res.cols['info:regioninfo'].value
+		regionInfo = res.obj.info.regioninfo
 		regionInfo = regionInfo.slice regionInfo.toString().indexOf('PBUF') + 4
 		regionInfo = proto.RegionInfo.decode regionInfo
 
 		region =
-			server: res.cols['info:server'].value
+			server: res.obj.info.server
 			startKey: regionInfo.startKey.toBuffer()
 			endKey: regionInfo.endKey.toBuffer()
 			name: res.row
-			ts: res.cols['info:server'].timestamp.toString()
+			ts: res.obj.info.server.timestamp.toString()
 
 		region
 
@@ -260,35 +260,26 @@ module.exports = class Client extends EventEmitter
 
 		# TODO: upravit strukturu
 		row = null
-		cols = {}
+		obj = { }
 
-		columns = res.cell.map (cell) ->
-			row = cell.row.toBuffer()
-			f = cell.family.toBuffer()
-			q = cell.qualifier.toBuffer()
+		res.cell.forEach (cell) ->
+			if row is null
+				row = cell.row.toBuffer()
+
 			v = cell.value.toBuffer()
-			t = cell.timestamp
 
-			o =
-				value: v
-				timestamp: t
-
-			# multiple versions
-			if cols["#{f}:#{q}"]
-				cols["#{f}:#{q}"] = [cols["#{f}:#{q}"]] unless Array.isArray cols["#{f}:#{q}"]
-				cols["#{f}:#{q}"].push o
-			else
-				cols["#{f}:#{q}"] = o
-
-			family: f
-			qualifier: q
-			value: v
-			timestamp: t
+			fs = cell.family.toBuffer().toString();
+			qs = cell.qualifier.toBuffer().toString();
+			fo = obj[fs];
+			if fo is undefined
+				fo = obj[fs] = { }
+			
+			v.timestamp = cell.timestamp;
+			fo[qs] = v;
 
 		o =
 			row: row
-			cols: cols
-			columns: columns
+			obj: obj
 
 		o
 

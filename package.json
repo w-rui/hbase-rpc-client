@@ -1,5 +1,5 @@
 {
-  "name": "hbase-rpc-client",
+  "name": "@oe-lib/hbase-rpc-client",
   "version": "0.1.15",
   "description": "CoffeeScript HBase client implementation with protobuf support",
   "main": "index.js",
@@ -41,5 +41,11 @@
     "coffeelint": "~1.11.1",
     "mocha": "~2.3.2",
     "require-dir": "~0.3.0"
+  },
+  "preferGlobal": false,
+  "private": false,
+  "publishConfig": {
+    "registry": "https://npm.oecore.com",
+    "scope": "oe-lib"
   }
 }
